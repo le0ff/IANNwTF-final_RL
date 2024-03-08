@@ -1,0 +1,5 @@
+numpy
+tensorflow
+gymnasium
+pygame
+matplotlib
