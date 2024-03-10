@@ -1,0 +1,22 @@
+Model: "sequential"
+_________________________________________________________________
+ Layer (type)                Output Shape              Param #   
+=================================================================
+ dense (Dense)               (None, 24)                120       
+                                                                 
+ dense_1 (Dense)             (None, 24)                600       
+                                                                 
+ dense_2 (Dense)             (None, 2)                 50        
+                                                                 
+=================================================================
+Total params: 770 (3.01 KB)
+Trainable params: 770 (3.01 KB)
+Non-trainable params: 0 (0.00 Byte)
+_________________________________________________________________
+Replay buffer length: 20000
+Learning rate: 0.001
+Discount factor: 0.99
+Batch size: 64
+Epsilon decay: 0.995
+Target update frequency: 4
+Episodes: 500
