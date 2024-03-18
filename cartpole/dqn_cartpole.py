@@ -7,6 +7,13 @@ from tensorflow.keras import layers
 from collections import deque
 import matplotlib.pyplot as plt
 
+#against memory leak (unsure about the effectiveness)
+from tensorflow.compat.v1.keras.backend import set_session
+#tf.compat.v1.disable_eager_execution()
+config = tf.compat.v1.ConfigProto()
+config.gpu_options.allow_growth = True
+sess = tf.compat.v1.Session(config=config)
+set_session(sess)
 
 #DQN-AGENT
 class DQN:
@@ -42,7 +49,7 @@ class DQN:
         if np.random.rand() < epsilon:
             return np.random.choice(self.num_actions)
         else:
-            Q_values = self.model.predict(state[np.newaxis])
+            Q_values = self.model(state[np.newaxis])
             #Q_values = self.model.predict(state)
             return np.argmax(Q_values[0])
     
@@ -59,14 +66,17 @@ class DQN:
         states, actions, rewards, next_states, dones = map(np.array, zip(*samples))
         
         #Q-values
-        q_values = self.model.predict(states)
+        q_values = self.model(states)
         #next Q-values from target model
-        next_q_values = self.target_model.predict(next_states)
+        next_q_values = self.target_model(next_states)
         max_next_q_values = np.max(next_q_values, axis=1)
         #calculate target Q-values using Bellman equation
         target_q_values = (rewards + (1 - dones) * self.discount_factor * max_next_q_values)
+
+        # #quick fix for TypeError: 'tensorflow.python.framework.ops.EagerTensor' object does not support item assignment
+        q_values = q_values.numpy()
         q_values[range(batch_size), actions] = target_q_values
-        self.model.fit(states, q_values, verbose=0)
+        self.model.train_on_batch(states, q_values)
 
     #updates target model weights with model weights
     def update_target_model(self):
