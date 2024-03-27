@@ -156,6 +156,7 @@ class DQN:
         #loading target model with equal weights
         self.target_model = tf.keras.models.load_model(f"{path}")
 
+
 #disable interactive logging
 keras.utils.disable_interactive_logging()
 

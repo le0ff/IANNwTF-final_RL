@@ -1,5 +1,8 @@
 numpy
+#certain version of keras for compatibility with saved models?
+keras
 tensorflow
 gymnasium
 pygame
 matplotlib
+box2d-py
