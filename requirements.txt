@@ -1,6 +1,6 @@
 numpy
 keras==2.13.1
-tensorflow=2.13.1 #used tensorflow-rocm==2.13.1.600 for ROCm
+tensorflow==2.13.1 #used tensorflow-rocm==2.13.1.600 for ROCm
 gymnasium==0.29.1
 pygame
 matplotlib
