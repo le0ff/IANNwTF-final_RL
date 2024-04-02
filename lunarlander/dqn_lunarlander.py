@@ -35,9 +35,8 @@ class DQN:
             model = tf.keras.models.Sequential(self.architecture)
         else:
             model = tf.keras.models.Sequential([
-            layers.Dense(64, activation="relu", input_shape=self.input_shape),
-            layers.Dense(64, activation="relu"), 
-            layers.Dense(64, activation="relu"),
+            layers.Dense(32, activation="relu", input_shape=self.input_shape),
+            layers.Dense(32, activation="relu"), 
             layers.Dense(self.num_actions, activation="linear")
         ])
         #compiles model with mean squared error loss and adam optimizer
@@ -164,9 +163,11 @@ class DQN:
             running_reward.append(episode_reward)
             epsilon = max(min_epsilon, epsilon * epsilon_decay)
 
-            if output and episode % 10 == 0:
-                print(f"Episode: {episode} episode reward: {episode_reward} Epsilon: {epsilon}")
-            
+            if output and episode % 100 == 0:
+                #print(f"Episode: {episode} episode reward: {episode_reward} Epsilon: {epsilon}")
+                #episode, episode_reward and cumulative reward over the last 100 episodes
+                print(f"Episode: {episode} episode reward: {episode_reward} cumulative reward: {np.mean(running_reward[-100:])}")
+
             if saving and episode % saving_frequency == 0:
                 self.save(f"{saving}/intermediate_results/episode_{episode}")
                 
@@ -219,42 +220,120 @@ INPUT_SHAPE = (8,)
 NUM_ACTIONS = 4
 
 #MODEL
-REPLAY_BUFFER_SIZE = 100000
+REPLAY_BUFFER_SIZE = 250000
 LEARNING_RATE = 0.0001
 DISCOUNT_FACTOR = 0.99
 ARCHITECTURE = None
 
 #HYPERPARAMETERS
 EPSILON_DECAY = 0.99941
-BATCH_SIZE = 32
+BATCH_SIZE = [32, 64]
 NUM_EPISODES = 5000
-TARGET_UPDATE_FREQ = 1
+TARGET_UPDATE_FREQ = [1, 4, 8, 16, 32]
 
 ################################################################################################################################
 
-#training and saving the model
-# PATH = f"models/small_replay_buffer"
-# dqn = DQN(INPUT_SHAPE, NUM_ACTIONS, REPLAY_BUFFER_SIZE, LEARNING_RATE, DISCOUNT_FACTOR, ARCHITECTURE)
-# train_reward = dqn.train(epsilon_decay=EPSILON_DECAY, num_episodes=NUM_EPISODES, batch_size=BATCH_SIZE, target_update_freq=TARGET_UPDATE_FREQ, output=True, saving=PATH)
-# dqn.save(f"{PATH}/final_model")
-# np.save(f"{PATH}/train_reward.npy", train_reward)
-# test_rewards = dqn.test(num_episodes=100, output=True)
-# np.save(f"{PATH}/test_rewards.npy", test_rewards)
+#training for one model
+def training(name="intial_model"):
+    #print start time
+    print(time.strftime("%H:%M:%S", time.localtime()))
 
-# #saving further information
-# with open(f"{PATH}/info.txt", "w") as file:
-#     #model summary
-#     dqn.model.summary(print_fn=lambda x: file.write(x + '\n'))
-#     file.write(f"Replay buffer size: {REPLAY_BUFFER_SIZE}\n")
-#     file.write(f"Learning rate: {LEARNING_RATE}\n")
-#     file.write(f"Discount factor: {DISCOUNT_FACTOR}\n")
-#     file.write(f"Epsilon decay: {EPSILON_DECAY}\n")
-#     file.write(f"Batch size: {BATCH_SIZE}\n")
-#     file.write(f"Number of episodes: {NUM_EPISODES}\n")
-#     file.write(f"Target update frequency: {TARGET_UPDATE_FREQ}\n")
+    PATH = f"models/{name}"
+    dqn = DQN(INPUT_SHAPE, NUM_ACTIONS, REPLAY_BUFFER_SIZE, LEARNING_RATE, DISCOUNT_FACTOR, ARCHITECTURE)
+    train_reward = dqn.train(epsilon_decay=EPSILON_DECAY, num_episodes=NUM_EPISODES, batch_size=BATCH_SIZE, target_update_freq=TARGET_UPDATE_FREQ, output=True, saving=PATH)
+    dqn.save(f"{PATH}/final_model")
+    np.save(f"{PATH}/train_reward.npy", train_reward)
+    test_rewards = dqn.test(num_episodes=100, output=True)
+    np.save(f"{PATH}/test_rewards.npy", test_rewards)
 
-# # #print time
-# print(time.strftime("%H:%M:%S", time.localtime()))
+    #saving further information
+    with open(f"{PATH}/info.txt", "w") as file:
+        #model summary
+        dqn.model.summary(print_fn=lambda x: file.write(x + '\n'))
+        file.write(f"Replay buffer size: {REPLAY_BUFFER_SIZE}\n")
+        file.write(f"Learning rate: {LEARNING_RATE}\n")
+        file.write(f"Discount factor: {DISCOUNT_FACTOR}\n")
+        file.write(f"Epsilon decay: {EPSILON_DECAY}\n")
+        file.write(f"Batch size: {BATCH_SIZE}\n")
+        file.write(f"Number of episodes: {NUM_EPISODES}\n")
+        file.write(f"Target update frequency: {TARGET_UPDATE_FREQ}\n")
+
+    # #print time
+    print(time.strftime("%H:%M:%S", time.localtime()))
+
+#training and saving the models, here for different batch sizes and target update frequencies
+def training_models():
+    for batch_size in BATCH_SIZE:
+        for target_update_freq in TARGET_UPDATE_FREQ:
+            PATH = f"models/batch_size_{batch_size}/target_update_freq_{target_update_freq}"
+            print(f"Model {PATH}")
+            #print start time for each model
+            print(time.strftime("%H:%M:%S", time.localtime()))
+
+            dqn = DQN(INPUT_SHAPE, NUM_ACTIONS, REPLAY_BUFFER_SIZE, LEARNING_RATE, DISCOUNT_FACTOR, ARCHITECTURE)
+            train_reward = dqn.train(epsilon_decay=EPSILON_DECAY, num_episodes=NUM_EPISODES, batch_size=batch_size, target_update_freq=target_update_freq, output=True, saving=PATH)
+            dqn.save(f"{PATH}/final_model")
+            np.save(f"{PATH}/train_reward.npy", train_reward)
+            test_rewards = dqn.test(num_episodes=100, output=True)
+            np.save(f"{PATH}/test_rewards.npy", test_rewards)
+
+            #saving further information
+            with open(f"{PATH}/info.txt", "w") as file:
+                #model summary
+                dqn.model.summary(print_fn=lambda x: file.write(x + '\n'))
+                file.write(f"Replay buffer size: {REPLAY_BUFFER_SIZE}\n")
+                file.write(f"Learning rate: {LEARNING_RATE}\n")
+                file.write(f"Discount factor: {DISCOUNT_FACTOR}\n")
+                file.write(f"Epsilon decay: {EPSILON_DECAY}\n")
+                file.write(f"Batch size: {batch_size}\n")
+                file.write(f"Number of episodes: {NUM_EPISODES}\n")
+                file.write(f"Target update frequency: {target_update_freq}\n")
+            
+            #release memory
+            del dqn
+            tf.keras.backend.clear_session()
+
+            #print time
+            print(time.strftime("%H:%M:%S", time.localtime()))
+
+
+################################################################################################################################
+
+#testing each intermediate save of the model and saving the results
+def testing(name="intial_model"):
+    PATH = f"models/{name}/intermediate_results"
+    for episode in range(500, NUM_EPISODES, 500):
+        print(f"Model {PATH}/episode_{episode}")
+        dqn = DQN(INPUT_SHAPE, NUM_ACTIONS, REPLAY_BUFFER_SIZE, LEARNING_RATE, DISCOUNT_FACTOR, ARCHITECTURE)
+        dqn.load(f"{PATH}/episode_{episode}")
+        test_rewards = dqn.test(num_episodes=100, output=False)
+        np.save(f"{PATH}/test_rewards_episode_{episode}.npy", test_rewards)
+        
+        #print average test reward
+        print(f"Average test reward: {np.mean(test_rewards)}")
+        
+        #release memory
+        del dqn
+        tf.keras.backend.clear_session()
+
+#testing each intermediate save of the models and saving results in npy files
+def testing_models():
+    for batch_size in BATCH_SIZE:
+        for target_update_freq in TARGET_UPDATE_FREQ:
+            PATH = f"models/batch_size_{batch_size}/target_update_freq_{target_update_freq}/intermediate_results"
+            for episode in range(500, NUM_EPISODES, 500):
+                print(f"Model {PATH}/episode_{episode}")
+                dqn = DQN(INPUT_SHAPE, NUM_ACTIONS, REPLAY_BUFFER_SIZE, LEARNING_RATE, DISCOUNT_FACTOR, ARCHITECTURE)
+                dqn.load(f"{PATH}/episode_{episode}")
+                test_rewards = dqn.test(num_episodes=100, output=False)
+                np.save(f"{PATH}/test_rewards_episode_{episode}.npy", test_rewards)
+                
+                #print average test reward
+                print(f"Average test reward: {np.mean(test_rewards)}")
+                
+                #release memory
+                del dqn
+                tf.keras.backend.clear_session()
 
 ################################################################################################################################
 
@@ -272,29 +351,4 @@ TARGET_UPDATE_FREQ = 1
 
 # plt.show()
 
-
-
 ################################################################################################################################
-
-#testing each intermediate save of the model with for loop and saving the results
-PATH = f"models/big_replay_buffer/intermediate_results"
-for episode in range(500, NUM_EPISODES, 500):
-    print(f"Model {PATH}/episode_{episode}")
-    dqn = DQN(INPUT_SHAPE, NUM_ACTIONS, REPLAY_BUFFER_SIZE, LEARNING_RATE, DISCOUNT_FACTOR, ARCHITECTURE)
-    dqn.load(f"{PATH}/episode_{episode}")
-    test_rewards = dqn.test(num_episodes=100, output=False)
-    np.save(f"{PATH}/test_rewards_episode_{episode}.npy", test_rewards)
-    
-    #print average test reward
-    print(f"Average test reward: {np.mean(test_rewards)}")
-    
-    #release memory
-    del dqn
-    tf.keras.backend.clear_session()
-
-################################################################################################################################
-
-#calculate mean for test_rewards
-# test_rewards = np.load("models/initial_model/test_rewards.npy")
-# mean = np.mean(test_rewards)
-# print(mean)
