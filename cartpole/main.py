@@ -5,6 +5,7 @@ import numpy as np
 import time
 import tensorflow as tf
 from tensorflow import keras
+from tensorflow.keras import layers
 
 #training for one model
 def training(name="intial_model", render=False):
@@ -142,7 +143,11 @@ keras.utils.disable_interactive_logging()
 REPLAY_BUFFER_SIZE = 20000
 LEARNING_RATE = 0.001
 DISCOUNT_FACTOR = 0.99
-ARCHITECTURE = None
+ARCHITECTURE = [
+    layers.Dense(24, activation="relu", input_shape=(4,)),
+    layers.Dense(24, activation="relu"),
+    layers.Dense(2, activation="linear")
+    ]
 
 #HYPERPARAMETERS
 EPSILON_DECAY = 0.995
