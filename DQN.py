@@ -16,8 +16,7 @@ set_session(sess)
 class DQN:
     def __init__(self, env_name="LunarLander-v2", replay_buffer_size=100000, learning_rate=0.0001, discount_factor=0.99, architecture=None):
         """
-        input_shape: shape of the input 
-        num_actions: number of actions
+        env_name: name of the environment
         replay_buffer_size: size of the replay buffer
         learning_rate: learning rate of the optimizer
         discount_factor: discount factor for the bellman equation
@@ -27,8 +26,7 @@ class DQN:
         self.env_name = env_name
         self.input_shape = temp_env.observation_space.shape
         self.num_actions = temp_env.action_space.n
-        # self.input_shape = input_shape
-        # self.num_actions = num_actions
+        
         self.replay_buffer_size = replay_buffer_size
         self.replay_buffer = deque(maxlen=self.replay_buffer_size)
         self.learning_rate = learning_rate

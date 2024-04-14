@@ -1,2 +1,10 @@
-# IANNwTF-final_RL
-Final project on Reinforcement Learning for "Implementing Artificial Neural Networks with TensorFlow" by Benito Manocchio, Chantal Nagel &amp; Leon Hanser. [Further information to be added]
+# Approaching Deep Reinforcement Learning by Using Deep Q-Learning Networks
+Final project on Reinforcement Learning for "Implementing Artificial Neural Networks with TensorFlow" by Benito Manocchio, Chantal Nagel &amp; Leon Hanser. As our final project for the course we approach Deep Reinforcement Learning by implementing a Deep Q-Network (DQN) in TensorFlow and train and test it on Gymnasium's Cart Pole and Lunar Lander environments.
+
+## Requirements
+We used Python 3.10.12 and the packages listed in requirements.txt. The core packages are [Keras](https://keras.io/) and [TensorFlow](https://www.tensorflow.org/) with versions 2.13.1, and [Gymnasium](https://gymnasium.farama.org/) with 0.29.1. For the complete list, take a look at the requirements.
+
+For Windows (using Conda) we encountered an error with the Jupyter Notebook cells and the typing-extensions package. Upgrading it, eventhough there was a conflict with the hardware-specific TensorFlow version (in our case tensorflow-intel) fixed the problem for us.
+
+## Structure and Usage
+We implemented the basic DQN class in the DQN.py file that is in the base directory. Beside the DQN, there is also a plot visualisation notebook for insights on results and some plots. We created two subfolders, one for Cart Pole and one for Lunar Lander. Both folders are of the same structure: They have a main.py, a testing notebook and a models folder. The main file consists of four methods: "training", "training_models", "testing", "testing_models". Two of them are for only one model at a time, while the other two are for several models, depending on the settings. In the main file the settings and hyper-parameters can be changed and operation that should be executed can be commented-in. In the models folder are the models (and intermediate models) saved with the weights, training rewards, testing rewards and other information. From there the weights, rewards and more can also be loaded for testing and displaying/plotting results. The testing notebooks in each of the folders can be used as "quick-start", there one can easily setup a DQN and change some settings or hyper-parameters, test it prior to the training, can train it, test it or load weights and test the loaded model, also everything with visualisation.
